@@ -1,5 +1,6 @@
 from fastapi import APIRouter, status, HTTPException, Depends
 from fastapi.security.oauth2 import OAuth2PasswordRequestForm
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from .. import utils, database, models, oauth2
 
@@ -28,4 +29,6 @@ def login(
 
     # create token
     access_token = oauth2.create_access_token({"user_id": user.id})
-    return {"access_token": access_token, "token_type": "bearer"}
+    message = {"access_token": access_token, "token_type": "bearer"}
+
+    return JSONResponse(message)
