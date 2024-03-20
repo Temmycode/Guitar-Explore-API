@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     secret_key: str
     algorithm: str
     access_token_expiration_minutes: int
+    google_client_id: str
+    google_client_secret: str
 
     class Config:
         env_file = ".env"

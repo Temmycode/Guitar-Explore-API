@@ -1,17 +1,21 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from . import models
-from .database import engine
-from .routers import users, auth
+from starlette.middleware.sessions import SessionMiddleware
+from .routers import users
+from .routers import auth
+from .config import settings
 
 app = FastAPI()
 
+
 origins = ["*"]
+
+app.add_middleware(SessionMiddleware, secret_key=settings.secret_key)
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allowcredential=True,
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
