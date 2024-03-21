@@ -100,12 +100,11 @@ def signup(db: Session, user: schemas.CreateUser):
 async def determine_login_or_signup(
     user: schemas.CreateUser,
     db: Session,
-) -> str:
+) -> schemas.User:
     user_exist = db.query(models.User).filter(models.User.email == user.email).first()
     if user_exist is None:
         # create user
         signup(db, user)
+    json_user = schemas.User.from_orm(user_exist.__dict__)
 
-    # log in the user
-    access_token = login(db, user.email, user.password)
-    return access_token
+    return json_user

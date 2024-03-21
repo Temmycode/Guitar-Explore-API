@@ -10,8 +10,10 @@ app = FastAPI()
 
 origins = ["*"]
 
+# noinspection PyTypeChecker
 app.add_middleware(SessionMiddleware, secret_key=settings.secret_key)
 
+# noinspection PyTypeChecker
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,

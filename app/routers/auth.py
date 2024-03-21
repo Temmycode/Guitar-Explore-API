@@ -22,7 +22,7 @@ def login(
 
 
 @router.post("/google-signin", status_code=status.HTTP_200_OK, response_model=schemas.GoogleSignOutput)
-async def login_with_google(token_id: schemas.GoogleSignIn, db: Session = Depends(database.get_db),) -> JSONResponse:
+async def login_with_google(token_id: schemas.GoogleSignIn, db: Session = Depends(database.get_db),):
     tokeninfo_url = "https://oauth2.googleapis.com/tokeninfo?id_token="
     async with httpx.AsyncClient() as client:
         try:
@@ -40,16 +40,19 @@ async def login_with_google(token_id: schemas.GoogleSignIn, db: Session = Depend
                     # if the response code is 200
                     # get the user information from the body
                     body = response.json()
+
+                    # create a user and if the user is already created just return the user
                     user = schemas.CreateUser(
                         email=body["email"],
                         password=f"{body["name"]}{body["family_name"]}",
                         username=body["name"],
                         profile_picture=body["picture"],
                     )
-                    access_token = await oauth2.determine_login_or_signup(user, db)
-                    content = {"access_token": access_token, "token_type": "bearer", "user": user.dict()}
+                    db_user = await oauth2.determine_login_or_signup(user, db)
+                    content = {"access_token": token_id.id_token, "token_type": "bearer", "user": db_user}
+                    print(content)
                     # return access token and the user_data as json response
-                    return JSONResponse(content)
+                    return content
                 else:
                     raise HTTPException(
                         status_code=status.HTTP_404_NOT_FOUND,
