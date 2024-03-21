@@ -25,5 +25,17 @@ class User(BaseModel):
         from_attributes = True
 
 
+class GoogleSignIn(BaseModel):
+    id_token: str
+
+
+class GoogleSignOutput(BaseModel):
+    access_token: str
+    user: User
+
+    class Config:
+        from_attributes = True
+
+
 class TokenData(BaseModel):
     id: int

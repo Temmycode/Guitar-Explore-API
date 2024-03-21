@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     access_token_expiration_minutes: int
     google_client_id: str
     google_client_secret: str
+    ios_client_id: str
 
     class Config:
         env_file = ".env"

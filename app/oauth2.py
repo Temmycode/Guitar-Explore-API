@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
 from .config import settings
-from . import schemas, database, models
+from . import schemas, database, models, utils
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
@@ -55,3 +55,57 @@ def get_current_user(
     )  # make use of a hashmap to get the user
 
     return user
+
+
+def login(db: Session, username: str, password: str) -> str:
+    user = db.query(models.User).filter(models.User.email == username).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User doesn't exist Credentials",
+        )
+
+    if not utils.verify_password(password, user.password):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Invalid Credentials"
+        )
+
+    # create token
+    access_token = create_access_token({"user_id": user.id})
+    return access_token
+
+
+def signup(db: Session, user: schemas.CreateUser):
+    query_user = db.query(models.User).filter(models.User.email == user.email).first()
+
+    if not query_user == None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="User with email already exists",
+        )
+    hashed_password = utils.hash_password(
+        user.password
+    )  # hash the password passed through the json
+    user.password = (
+        hashed_password  # store the hashed password as the value to be added to the db
+    )
+    user = models.User(**user.dict())
+    print(user.password)
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+async def determine_login_or_signup(
+    user: schemas.CreateUser,
+    db: Session,
+) -> str:
+    user_exist = db.query(models.User).filter(models.User.email == user.email).first()
+    if user_exist is None:
+        # create user
+        signup(db, user)
+
+    # log in the user
+    access_token = login(db, user.email, user.password)
+    return access_token
