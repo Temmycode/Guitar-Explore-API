@@ -11,16 +11,6 @@ import httpx
 router = APIRouter(tags=["Authentication"])
 
 
-@router.post("/login")
-def login(
-        user_credentials: OAuth2PasswordRequestForm = Depends(),
-        db: Session = Depends(database.get_db),
-):
-    access_token = oauth2.login(db, user_credentials.username, user_credentials.password)
-    message = {"access_token": access_token, "token_type": "bearer"}
-    return JSONResponse(message)
-
-
 @router.post("/google-signin", status_code=status.HTTP_200_OK, response_model=schemas.GoogleSignOutput)
 async def login_with_google(token_id: schemas.GoogleSignIn, db: Session = Depends(database.get_db),):
     tokeninfo_url = "https://oauth2.googleapis.com/tokeninfo?id_token="
