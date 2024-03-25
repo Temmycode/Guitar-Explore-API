@@ -40,7 +40,6 @@ async def login_with_google(token_id: schemas.GoogleSignIn, db: Session = Depend
                     )
                     db_user = await oauth2.determine_login_or_signup(user, db)
                     content = {"access_token": token_id.id_token, "token_type": "bearer", "user": db_user}
-                    print(content)
                     # return access token and the user_data as json response
                     return content
                 else:

@@ -106,6 +106,7 @@ async def determine_login_or_signup(
         # create user
         created_user = signup(db, user)
         user = schemas.User.from_orm(created_user.__dict__)
+
         return user
     else:
         user = schemas.User.from_orm(user_exist.__dict__)
